@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ERAS, REGIONS, type EraId, type RegionId } from "@/lib/frc-data";
 
 import { teamsFor, type FrcTeam } from "@/lib/generated";
@@ -435,6 +435,22 @@ function DraftBoard({
   hideEpaRanks: boolean;
 }) {
   const active = slots[activeIdx];
+  const [teamSearch, setTeamSearch] = useState("");
+  const normalizedTeamSearch = teamSearch.trim().toLowerCase();
+  const filteredOptions = useMemo(() => {
+    if (!hideEpaRanks || normalizedTeamSearch.length === 0) return options;
+
+    return options.filter((team) =>
+      [team.number.toString(), team.name, team.city, team.state]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(normalizedTeamSearch)),
+    );
+  }, [hideEpaRanks, normalizedTeamSearch, options]);
+
+  useEffect(() => {
+    setTeamSearch("");
+  }, [activeIdx, active.region, active.era]);
+
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -505,16 +521,35 @@ function DraftBoard({
       </div>
 
       {/* Pool */}
-      <div className="mb-4 flex items-baseline justify-between">
-        <h3 className="font-display text-2xl tracking-wide">
-          PICK YOUR TEAM
-          <span className="ml-2 font-mono text-xs text-muted-foreground">
-            {spinning ? "…" : `${options.length} available`}
-          </span>
-        </h3>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          One selection locks the round
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h3 className="font-display text-2xl tracking-wide">
+            PICK YOUR TEAM
+            <span className="ml-2 font-mono text-xs text-muted-foreground">
+              {spinning
+                ? "…"
+                : hideEpaRanks && normalizedTeamSearch
+                  ? `${filteredOptions.length} of ${options.length} available`
+                  : `${options.length} available`}
+            </span>
+          </h3>
+          <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            One selection locks the round
+          </div>
         </div>
+        {hideEpaRanks && (
+          <label className="w-full md:max-w-xs">
+            <span className="sr-only">Search teams</span>
+            <input
+              type="search"
+              value={teamSearch}
+              onChange={(event) => setTeamSearch(event.target.value)}
+              placeholder="Search team #, name, city..."
+              disabled={spinning}
+              className="w-full border border-border bg-background/80 px-3 py-2 font-mono text-xs uppercase tracking-widest text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary disabled:opacity-40"
+            />
+          </label>
+        )}
       </div>
 
       {spinning ? (
@@ -547,9 +582,16 @@ function DraftBoard({
             </button>
           </div>
         </div>
+      ) : filteredOptions.length === 0 ? (
+        <div className="panel-metal p-8 text-center">
+          <div className="font-display text-3xl tracking-wide text-accent">NO MATCHING TEAMS</div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Try a different team number, name, or location to narrow this Ball Knowledge pool.
+          </p>
+        </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
-          {options.map((t) => (
+          {filteredOptions.map((t) => (
             <TeamCard key={t.number} team={t} onPick={() => onPick(t)} hideEpaRank={hideEpaRanks} />
           ))}
         </div>
