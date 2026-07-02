@@ -675,7 +675,7 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent">
-            ALLIANCE LOCKED · PROJECTED 10-0
+            ALLIANCE LOCKED
           </div>
           <h2 className="font-display text-6xl tracking-wide">YOUR ALLIANCE</h2>
           <div className="mt-3 inline-flex border border-accent/60 bg-accent/10 px-4 py-2 font-display text-3xl tracking-wide text-accent">
