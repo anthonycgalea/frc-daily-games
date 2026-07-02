@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ERAS, REGIONS, teamsFor, type EraId, type FrcTeam, type RegionId } from "@/lib/frc-data";
+import {
+    ERAS,
+    REGIONS,
+    type EraId,
+    type RegionId,
+} from "@/lib/frc-data";
+
+import {
+    teamsFor,
+    type FrcTeam,
+} from "@/lib/generated";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -505,7 +515,7 @@ function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
           <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             {team.city}
           </div>
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{team.blurb}</p>
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{`${team.season.year} • #${team.season.rank} EPA`}</p>
         </div>
         <div className="hidden self-center font-mono text-xs text-primary opacity-0 transition group-hover:opacity-100 md:block">
           DRAFT →
