@@ -1,9 +1,4 @@
-export type EraId =
-  | "late2000s"
-  | "early2010s"
-  | "mid2010s"
-  | "late2010s"
-  | "twenties";
+export type EraId = "late2000s" | "early2010s" | "mid2010s" | "late2010s" | "twenties";
 
 export type RegionId =
   | "southeastMichigan"
@@ -90,8 +85,7 @@ export const REGIONS: {
     id: "newEngland",
     label: "New England",
     code: "NE",
-    territory:
-      "Massachusetts, Connecticut, New Hampshire, Maine, Vermont, Rhode Island",
+    territory: "Massachusetts, Connecticut, New Hampshire, Maine, Vermont, Rhode Island",
     accent: "#7C3AED",
   },
   {
@@ -217,8 +211,7 @@ export const REGIONS: {
     id: "pacific",
     label: "Pacific",
     code: "PAC",
-    territory:
-      "Australia, Chinese Taipei, Hawaii, Japan, Singapore, Philippines",
+    territory: "Australia, Chinese Taipei, Hawaii, Japan, Singapore, Philippines",
     accent: "#0891B2",
   },
   {

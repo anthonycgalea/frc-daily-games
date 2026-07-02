@@ -1,16 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import {
-    ERAS,
-    REGIONS,
-    type EraId,
-    type RegionId,
-} from "@/lib/frc-data";
+import { ERAS, REGIONS, type EraId, type RegionId } from "@/lib/frc-data";
 
-import {
-    teamsFor,
-    type FrcTeam,
-} from "@/lib/generated";
+import { teamsFor, type FrcTeam } from "@/lib/generated";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -567,7 +559,7 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
               <div className="mt-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 {t.city}
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">{t.blurb}</p>
+              <p className="mt-3 text-sm text-muted-foreground">{`${t.season.year} best season · #${t.season.rank} EPA · ${Math.round(t.season.winrate * 100)}% win rate`}</p>
               <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 {region.label} · {era.label}
               </div>
