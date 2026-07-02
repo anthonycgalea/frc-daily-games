@@ -26,9 +26,29 @@ function emptySlot(round: number): Slot {
   return { round, region: null, era: null, pick: null };
 }
 
-function randomEraAndRegion(): Pick<Slot, "era" | "region"> {
-  const era = randomOf(ERAS).id;
-  const eligibleRegions = REGIONS.filter((region) => teamsFor(region.id, era).length > 0);
+function pickedTeamNumbersBefore(slots: Slot[], idx: number): Set<number> {
+  return new Set(slots.slice(0, idx).flatMap((slot) => (slot.pick ? [slot.pick.number] : [])));
+}
+
+function availableTeamsFor(
+  region: RegionId,
+  era: EraId,
+  pickedTeamNumbers: Set<number>,
+): FrcTeam[] {
+  return teamsFor(region, era)
+    .filter((team) => !pickedTeamNumbers.has(team.number))
+    .sort((a, b) => a.season.rank - b.season.rank || a.number - b.number);
+}
+
+function randomEraAndRegion(base: Slot[], idx: number): Pick<Slot, "era" | "region"> {
+  const pickedTeamNumbers = pickedTeamNumbersBefore(base, idx);
+  const eligibleEras = ERAS.filter((era) =>
+    REGIONS.some((region) => availableTeamsFor(region.id, era.id, pickedTeamNumbers).length > 0),
+  );
+  const era = randomOf(eligibleEras).id;
+  const eligibleRegions = REGIONS.filter(
+    (region) => availableTeamsFor(region.id, era, pickedTeamNumbers).length > 0,
+  );
 
   return {
     era,
@@ -65,7 +85,7 @@ function Index() {
         const next = src.slice();
         next[idx] = {
           ...next[idx],
-          ...randomEraAndRegion(),
+          ...randomEraAndRegion(src, idx),
           pick: null,
         };
         return next;
@@ -97,8 +117,11 @@ function Index() {
   };
 
   const options = useMemo(
-    () => (active && active.region && active.era ? teamsFor(active.region, active.era) : []),
-    [active],
+    () =>
+      active && active.region && active.era
+        ? availableTeamsFor(active.region, active.era, pickedTeamNumbersBefore(slots, activeIdx))
+        : [],
+    [active, activeIdx, slots],
   );
 
   return (
