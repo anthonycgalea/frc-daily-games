@@ -367,7 +367,7 @@ function Hero({ onStart }: { onStart: () => void }) {
             [
               "03",
               "Reveal",
-              "See your all-time three-team alliance. Share it. Try to go 3-0 again.",
+              "See your all-time three-team alliance. Share it. Try to go 10-0 again.",
             ],
           ].map(([n, t, d]) => (
             <li key={n} className="panel-metal p-5">
