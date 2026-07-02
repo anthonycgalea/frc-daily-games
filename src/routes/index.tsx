@@ -50,6 +50,17 @@ function randomOf<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function shuffled<T>(arr: T[]): T[] {
+  const next = arr.slice();
+
+  for (let i = next.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
+  }
+
+  return next;
+}
+
 function emptySlot(round: number): Slot {
   return { round, region: null, era: null, pick: null };
 }
@@ -216,18 +227,18 @@ function Index() {
     setRerollsUsed({ region: false, era: false });
   };
 
-  const options = useMemo(
-    () =>
-      active && active.region && active.era
-        ? availableTeamsFor(
-            active.region,
-            active.era,
-            pickedTeamNumbersBefore(slots, activeIdx),
-            activeIdx === THIRD_ROBOT_INDEX,
-          )
-        : [],
-    [active, activeIdx, slots],
-  );
+  const options = useMemo(() => {
+    if (!active?.region || !active.era) return [];
+
+    const teams = availableTeamsFor(
+      active.region,
+      active.era,
+      pickedTeamNumbersBefore(slots, activeIdx),
+      activeIdx === THIRD_ROBOT_INDEX,
+    );
+
+    return gameMode === "ball-knowledge" ? shuffled(teams) : teams;
+  }, [active, activeIdx, gameMode, slots]);
 
   return (
     <div className="min-h-screen">
