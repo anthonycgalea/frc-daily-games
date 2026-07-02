@@ -405,14 +405,14 @@ function DraftBoard({
             disabled={spinning || !!active.pick || rerollsUsed.region}
             className="border border-border bg-secondary px-4 py-2 font-mono text-xs uppercase tracking-widest text-secondary-foreground transition hover:border-primary disabled:opacity-40"
           >
-            ↻ Region {rerollsUsed.region ? "0" : "1"}
+            ↻ Reroll Region
           </button>
           <button
             onClick={onRerollEra}
             disabled={spinning || !!active.pick || rerollsUsed.era}
             className="border border-border bg-secondary px-4 py-2 font-mono text-xs uppercase tracking-widest text-secondary-foreground transition hover:border-accent disabled:opacity-40"
           >
-            ↻ Era {rerollsUsed.era ? "0" : "1"}
+            ↻ Reroll Era
           </button>
         </div>
       </div>
