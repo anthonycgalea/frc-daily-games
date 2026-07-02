@@ -26,6 +26,8 @@ const MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK = 100;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
 const SHARE_URL = "https://frc-daily-games.vercel.app/";
 
+type GameMode = "standard" | "ball-knowledge";
+
 const RANKING_TIERS = [
   { minimumScore: 272, label: "Einstein Champions" },
   { minimumScore: 268, label: "Einstein Finalist" },
@@ -135,16 +137,18 @@ function Index() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [started, setStarted] = useState(false);
+  const [gameMode, setGameMode] = useState<GameMode>("standard");
   const [rerollsUsed, setRerollsUsed] = useState<RerollsUsed>({ region: false, era: false });
 
   const started_ = started && slots.length > 0;
   const active = slots[activeIdx];
   const complete = started_ && slots.every((s) => s.pick);
 
-  const start = () => {
+  const start = (mode: GameMode = "standard") => {
     const initial: Slot[] = Array.from({ length: ROUNDS }, (_, i) => emptySlot(i + 1));
     setSlots(initial);
     setActiveIdx(0);
+    setGameMode(mode);
     setStarted(true);
     setRerollsUsed({ region: false, era: false });
     spinBoth(0, initial);
@@ -205,6 +209,7 @@ function Index() {
   };
 
   const reset = () => {
+    setGameMode("standard");
     setSlots([]);
     setActiveIdx(0);
     setStarted(false);
@@ -240,9 +245,12 @@ function Index() {
             spinning={spinning}
             options={options}
             onPick={pick}
+            hideEpaRanks={gameMode === "ball-knowledge"}
           />
         )}
-        {complete && <FinalRoster slots={slots} onReset={reset} />}
+        {complete && (
+          <FinalRoster slots={slots} onReset={reset} hideEpaRanks={gameMode === "ball-knowledge"} />
+        )}
       </main>
       <Footer />
     </div>
@@ -274,7 +282,7 @@ function Header() {
   );
 }
 
-function Hero({ onStart }: { onStart: () => void }) {
+function Hero({ onStart }: { onStart: (mode?: GameMode) => void }) {
   return (
     <section className="relative">
       <div className="mt-6 grid gap-10 md:mt-10 md:grid-cols-[1.2fr_1fr]">
@@ -298,13 +306,23 @@ function Hero({ onStart }: { onStart: () => void }) {
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <button
-              onClick={onStart}
+              onClick={() => onStart("standard")}
               className="group relative inline-flex items-center gap-3 bg-primary px-7 py-4 font-display text-2xl tracking-widest text-primary-foreground transition hover:brightness-110"
             >
               START THE DRAFT
               <span className="font-mono text-sm">→</span>
               <span className="absolute -bottom-1 left-0 h-1 w-full bg-accent" />
             </button>
+            <button
+              onClick={() => onStart("ball-knowledge")}
+              className="group relative inline-flex items-center gap-3 border border-accent bg-accent/10 px-7 py-4 font-display text-2xl tracking-widest text-accent transition hover:bg-accent hover:text-accent-foreground"
+            >
+              BALL KNOWLEDGE MODE
+              <span className="font-mono text-sm">→</span>
+            </button>
+            <p className="basis-full font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              Ball Knowledge Mode hides EPA ranks while you draft.
+            </p>
           </div>
         </div>
 
@@ -392,6 +410,7 @@ function DraftBoard({
   spinning,
   options,
   onPick,
+  hideEpaRanks,
 }: {
   slots: Slot[];
   activeIdx: number;
@@ -402,6 +421,7 @@ function DraftBoard({
   spinning: boolean;
   options: FrcTeam[];
   onPick: (t: FrcTeam) => void;
+  hideEpaRanks: boolean;
 }) {
   const active = slots[activeIdx];
   return (
@@ -519,7 +539,7 @@ function DraftBoard({
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {options.map((t) => (
-            <TeamCard key={t.number} team={t} onPick={() => onPick(t)} />
+            <TeamCard key={t.number} team={t} onPick={() => onPick(t)} hideEpaRank={hideEpaRanks} />
           ))}
         </div>
       )}
@@ -636,7 +656,15 @@ function SpinPanel({
   );
 }
 
-function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
+function TeamCard({
+  team,
+  onPick,
+  hideEpaRank,
+}: {
+  team: FrcTeam;
+  onPick: () => void;
+  hideEpaRank: boolean;
+}) {
   return (
     <button
       onClick={onPick}
@@ -654,7 +682,11 @@ function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
           <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
             {team.city}
           </div>
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{`${team.season.year} • #${team.season.rank} EPA`}</p>
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+            {hideEpaRank
+              ? `${team.season.year} • EPA rank hidden`
+              : `${team.season.year} • #${team.season.rank} EPA`}
+          </p>
         </div>
         <div className="hidden self-center font-mono text-xs text-primary opacity-0 transition group-hover:opacity-100 md:block">
           DRAFT →
@@ -664,7 +696,15 @@ function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
   );
 }
 
-function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void }) {
+function FinalRoster({
+  slots,
+  onReset,
+  hideEpaRanks,
+}: {
+  slots: Slot[];
+  onReset: () => void;
+  hideEpaRanks: boolean;
+}) {
   const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
   const compositeScore = slots.reduce(
     (total, slot) => total + (slot.pick?.season.composite_score ?? 0),
@@ -735,7 +775,9 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
                       <span className="text-primary">{team.number}</span> {team.name}
                     </div>
                     <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {team.season.year} · #{team.season.rank} EPA
+                      {hideEpaRanks
+                        ? `${team.season.year} · EPA rank hidden`
+                        : `${team.season.year} · #${team.season.rank} EPA`}
                     </div>
                   </div>
                 );
@@ -780,7 +822,11 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
               <div className="mt-1 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
                 {t.city}
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">{`${t.season.year} · #${t.season.rank} EPA Worldwide· ${Math.round(t.season.winrate * 100)}% win rate`}</p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {hideEpaRanks
+                  ? `${t.season.year} · EPA rank hidden · ${Math.round(t.season.winrate * 100)}% win rate`
+                  : `${t.season.year} · #${t.season.rank} EPA Worldwide · ${Math.round(t.season.winrate * 100)}% win rate`}
+              </p>
               <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 {region.label} · {era.label}
               </div>
