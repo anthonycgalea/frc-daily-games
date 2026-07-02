@@ -26,9 +26,9 @@ const MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK = 100;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
 
 const RANKING_TIERS = [
-  { minimumScore: 269, label: "Einstein Champions" },
-  { minimumScore: 265, label: "Einstein Finalists" },
-  { minimumScore: 260, label: "Division Winner" },
+  { minimumScore: 272, label: "Einstein Champions" },
+  { minimumScore: 268, label: "Einstein Finalists" },
+  { minimumScore: 262, label: "Division Winner" },
   { minimumScore: 256, label: "Division Finalist" },
   { minimumScore: 252, label: "Division Match 13 Loss" },
   { minimumScore: 248, label: "Division Match 12 Loss" },
