@@ -21,6 +21,8 @@ type RerollsUsed = {
 };
 
 const ROUNDS = 3;
+const THIRD_ROBOT_INDEX = 2;
+const MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK = 100;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
 
 function randomOf<T>(arr: T[]): T {
@@ -39,20 +41,32 @@ function availableTeamsFor(
   region: RegionId,
   era: EraId,
   pickedTeamNumbers: Set<number>,
+  requireWorldwideEpaRankOver100 = false,
 ): FrcTeam[] {
   return teamsFor(region, era)
-    .filter((team) => !pickedTeamNumbers.has(team.number))
+    .filter(
+      (team) =>
+        !pickedTeamNumbers.has(team.number) &&
+        (!requireWorldwideEpaRankOver100 || team.season.rank > MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK),
+    )
     .sort((a, b) => a.season.rank - b.season.rank || a.number - b.number);
 }
 
 function randomEraAndRegion(base: Slot[], idx: number): Pick<Slot, "era" | "region"> {
   const pickedTeamNumbers = pickedTeamNumbersBefore(base, idx);
+  const requireWorldwideEpaRankOver100 = idx === THIRD_ROBOT_INDEX;
   const eligibleEras = ERAS.filter((era) =>
-    REGIONS.some((region) => availableTeamsFor(region.id, era.id, pickedTeamNumbers).length > 0),
+    REGIONS.some(
+      (region) =>
+        availableTeamsFor(region.id, era.id, pickedTeamNumbers, requireWorldwideEpaRankOver100)
+          .length > 0,
+    ),
   );
   const era = randomOf(eligibleEras).id;
   const eligibleRegions = REGIONS.filter(
-    (region) => availableTeamsFor(region.id, era, pickedTeamNumbers).length > 0,
+    (region) =>
+      availableTeamsFor(region.id, era, pickedTeamNumbers, requireWorldwideEpaRankOver100).length >
+      0,
   );
 
   return {
@@ -68,8 +82,11 @@ function randomRegionForEra(
   currentRegion: RegionId | null,
 ): RegionId {
   const pickedTeamNumbers = pickedTeamNumbersBefore(base, idx);
+  const requireWorldwideEpaRankOver100 = idx === THIRD_ROBOT_INDEX;
   const eligibleRegions = REGIONS.filter(
-    (region) => availableTeamsFor(region.id, era, pickedTeamNumbers).length > 0,
+    (region) =>
+      availableTeamsFor(region.id, era, pickedTeamNumbers, requireWorldwideEpaRankOver100).length >
+      0,
   );
   const alternateRegions = eligibleRegions.filter((region) => region.id !== currentRegion);
 
@@ -83,8 +100,11 @@ function randomEraForRegion(
   currentEra: EraId | null,
 ): EraId {
   const pickedTeamNumbers = pickedTeamNumbersBefore(base, idx);
+  const requireWorldwideEpaRankOver100 = idx === THIRD_ROBOT_INDEX;
   const eligibleEras = ERAS.filter(
-    (era) => availableTeamsFor(region, era.id, pickedTeamNumbers).length > 0,
+    (era) =>
+      availableTeamsFor(region, era.id, pickedTeamNumbers, requireWorldwideEpaRankOver100).length >
+      0,
   );
   const alternateEras = eligibleEras.filter((era) => era.id !== currentEra);
 
@@ -175,7 +195,12 @@ function Index() {
   const options = useMemo(
     () =>
       active && active.region && active.era
-        ? availableTeamsFor(active.region, active.era, pickedTeamNumbersBefore(slots, activeIdx))
+        ? availableTeamsFor(
+            active.region,
+            active.era,
+            pickedTeamNumbersBefore(slots, activeIdx),
+            activeIdx === THIRD_ROBOT_INDEX,
+          )
         : [],
     [active, activeIdx, slots],
   );
