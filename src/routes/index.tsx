@@ -76,16 +76,15 @@ function Index() {
   };
 
   const pick = (team: FrcTeam) => {
-    setSlots((prev) => {
-      const next = prev.slice();
-      next[activeIdx] = { ...next[activeIdx], pick: team };
-      return next;
-    });
+    const pickedSlots = slots.slice();
+    pickedSlots[activeIdx] = { ...pickedSlots[activeIdx], pick: team };
+    setSlots(pickedSlots);
+
     const nextIdx = activeIdx + 1;
-    if (nextIdx < slots.length) {
+    if (nextIdx < pickedSlots.length) {
       setActiveIdx(nextIdx);
-      // Fresh randomization for the next round
-      reroll(nextIdx);
+      // Fresh randomization for the next round, preserving the just-locked pick.
+      reroll(nextIdx, pickedSlots);
     }
   };
 
