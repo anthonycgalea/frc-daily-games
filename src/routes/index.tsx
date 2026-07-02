@@ -26,17 +26,17 @@ const MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK = 100;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
 
 const RANKING_TIERS = [
-  { minimumScore: 283, label: "Einstein Champions" },
-  { minimumScore: 280, label: "Einstein Finalists" },
-  { minimumScore: 277, label: "Division Winner" },
-  { minimumScore: 274, label: "Division Finalist" },
-  { minimumScore: 272, label: "Division Match 13 Loss" },
-  { minimumScore: 270, label: "Division Match 12 Loss" },
-  { minimumScore: 268, label: "1-2 In Division" },
-  { minimumScore: 266, label: "0-2 In Division" },
-  { minimumScore: 260, label: "Regional Winner" },
-  { minimumScore: 250, label: "Regional Finalist" },
-  { minimumScore: 240, label: "District Winner" },
+  { minimumScore: 269, label: "Einstein Champions" },
+  { minimumScore: 265, label: "Einstein Finalists" },
+  { minimumScore: 260, label: "Division Winner" },
+  { minimumScore: 256, label: "Division Finalist" },
+  { minimumScore: 252, label: "Division Match 13 Loss" },
+  { minimumScore: 248, label: "Division Match 12 Loss" },
+  { minimumScore: 245, label: "1-2 In Division" },
+  { minimumScore: 240, label: "0-2 In Division" },
+  { minimumScore: 230, label: "Regional Winner" },
+  { minimumScore: 220, label: "Regional Finalist" },
+  { minimumScore: 200, label: "District Winner" },
 ] as const;
 
 function rankingForCompositeScore(score: number): string {
