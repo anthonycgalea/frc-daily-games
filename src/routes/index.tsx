@@ -28,7 +28,7 @@ const SHARE_URL = "https://frc-daily-games.vercel.app/";
 
 const RANKING_TIERS = [
   { minimumScore: 272, label: "Einstein Champions" },
-  { minimumScore: 268, label: "Einstein Finalists" },
+  { minimumScore: 268, label: "Einstein Finalist" },
   { minimumScore: 262, label: "Division Winner" },
   { minimumScore: 256, label: "Division Finalist" },
   { minimumScore: 252, label: "Division Match 13 Loss" },
