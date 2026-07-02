@@ -24,6 +24,16 @@ function emptySlot(round: number): Slot {
   return { round, region: null, era: null, pick: null };
 }
 
+function randomEraAndRegion(): Pick<Slot, "era" | "region"> {
+  const era = randomOf(ERAS).id;
+  const eligibleRegions = REGIONS.filter((region) => teamsFor(region.id, era).length > 0);
+
+  return {
+    era,
+    region: randomOf(eligibleRegions).id,
+  };
+}
+
 function Index() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -53,8 +63,7 @@ function Index() {
         const next = src.slice();
         next[idx] = {
           ...next[idx],
-          region: randomOf(REGIONS).id,
-          era: randomOf(ERAS).id,
+          ...randomEraAndRegion(),
           pick: null,
         };
         return next;
