@@ -15,6 +15,11 @@ type Slot = {
   pick: FrcTeam | null;
 };
 
+type RerollsUsed = {
+  region: boolean;
+  era: boolean;
+};
+
 const ROUNDS = 3;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
 
@@ -56,11 +61,42 @@ function randomEraAndRegion(base: Slot[], idx: number): Pick<Slot, "era" | "regi
   };
 }
 
+function randomRegionForEra(
+  base: Slot[],
+  idx: number,
+  era: EraId,
+  currentRegion: RegionId | null,
+): RegionId {
+  const pickedTeamNumbers = pickedTeamNumbersBefore(base, idx);
+  const eligibleRegions = REGIONS.filter(
+    (region) => availableTeamsFor(region.id, era, pickedTeamNumbers).length > 0,
+  );
+  const alternateRegions = eligibleRegions.filter((region) => region.id !== currentRegion);
+
+  return randomOf(alternateRegions.length > 0 ? alternateRegions : eligibleRegions).id;
+}
+
+function randomEraForRegion(
+  base: Slot[],
+  idx: number,
+  region: RegionId,
+  currentEra: EraId | null,
+): EraId {
+  const pickedTeamNumbers = pickedTeamNumbersBefore(base, idx);
+  const eligibleEras = ERAS.filter(
+    (era) => availableTeamsFor(region, era.id, pickedTeamNumbers).length > 0,
+  );
+  const alternateEras = eligibleEras.filter((era) => era.id !== currentEra);
+
+  return randomOf(alternateEras.length > 0 ? alternateEras : eligibleEras).id;
+}
+
 function Index() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [started, setStarted] = useState(false);
+  const [rerollsUsed, setRerollsUsed] = useState<RerollsUsed>({ region: false, era: false });
 
   const started_ = started && slots.length > 0;
   const active = slots[activeIdx];
@@ -71,10 +107,11 @@ function Index() {
     setSlots(initial);
     setActiveIdx(0);
     setStarted(true);
-    reroll(0, initial);
+    setRerollsUsed({ region: false, era: false });
+    spinBoth(0, initial);
   };
 
-  const reroll = (idx: number, base = slots) => {
+  const spinSlot = (idx: number, updateSlot: (src: Slot[]) => Partial<Slot>, base = slots) => {
     setSpinning(true);
     const ticks = 18;
     let i = 0;
@@ -85,7 +122,7 @@ function Index() {
         const next = src.slice();
         next[idx] = {
           ...next[idx],
-          ...randomEraAndRegion(src, idx),
+          ...updateSlot(src),
           pick: null,
         };
         return next;
@@ -97,6 +134,24 @@ function Index() {
     }, 55);
   };
 
+  const spinBoth = (idx: number, base = slots) => {
+    spinSlot(idx, (src) => randomEraAndRegion(src, idx), base);
+  };
+
+  const rerollRegion = (idx: number) => {
+    const slot = slots[idx];
+    if (rerollsUsed.region || !slot?.era || slot.pick) return;
+    setRerollsUsed((used) => ({ ...used, region: true }));
+    spinSlot(idx, (src) => ({ region: randomRegionForEra(src, idx, slot.era!, slot.region) }));
+  };
+
+  const rerollEra = (idx: number) => {
+    const slot = slots[idx];
+    if (rerollsUsed.era || !slot?.region || slot.pick) return;
+    setRerollsUsed((used) => ({ ...used, era: true }));
+    spinSlot(idx, (src) => ({ era: randomEraForRegion(src, idx, slot.region!, slot.era) }));
+  };
+
   const pick = (team: FrcTeam) => {
     const pickedSlots = slots.slice();
     pickedSlots[activeIdx] = { ...pickedSlots[activeIdx], pick: team };
@@ -106,7 +161,7 @@ function Index() {
     if (nextIdx < pickedSlots.length) {
       setActiveIdx(nextIdx);
       // Fresh randomization for the next round, preserving the just-locked pick.
-      reroll(nextIdx, pickedSlots);
+      spinBoth(nextIdx, pickedSlots);
     }
   };
 
@@ -114,6 +169,7 @@ function Index() {
     setSlots([]);
     setActiveIdx(0);
     setStarted(false);
+    setRerollsUsed({ region: false, era: false });
   };
 
   const options = useMemo(
@@ -134,7 +190,9 @@ function Index() {
             slots={slots}
             activeIdx={activeIdx}
             onSelectSlot={setActiveIdx}
-            onReroll={() => reroll(activeIdx)}
+            onRerollRegion={() => rerollRegion(activeIdx)}
+            onRerollEra={() => rerollEra(activeIdx)}
+            rerollsUsed={rerollsUsed}
             spinning={spinning}
             options={options}
             onPick={pick}
@@ -284,7 +342,9 @@ function DraftBoard({
   slots,
   activeIdx,
   onSelectSlot,
-  onReroll,
+  onRerollRegion,
+  onRerollEra,
+  rerollsUsed,
   spinning,
   options,
   onPick,
@@ -292,7 +352,9 @@ function DraftBoard({
   slots: Slot[];
   activeIdx: number;
   onSelectSlot: (i: number) => void;
-  onReroll: () => void;
+  onRerollRegion: () => void;
+  onRerollEra: () => void;
+  rerollsUsed: RerollsUsed;
   spinning: boolean;
   options: FrcTeam[];
   onPick: (t: FrcTeam) => void;
@@ -314,11 +376,18 @@ function DraftBoard({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={onReroll}
-            disabled={spinning || !!active.pick}
+            onClick={onRerollRegion}
+            disabled={spinning || !!active.pick || rerollsUsed.region}
             className="border border-border bg-secondary px-4 py-2 font-mono text-xs uppercase tracking-widest text-secondary-foreground transition hover:border-primary disabled:opacity-40"
           >
-            ↻ Re-spin
+            ↻ Region {rerollsUsed.region ? "0" : "1"}
+          </button>
+          <button
+            onClick={onRerollEra}
+            disabled={spinning || !!active.pick || rerollsUsed.era}
+            className="border border-border bg-secondary px-4 py-2 font-mono text-xs uppercase tracking-widest text-secondary-foreground transition hover:border-accent disabled:opacity-40"
+          >
+            ↻ Era {rerollsUsed.era ? "0" : "1"}
           </button>
         </div>
       </div>
@@ -383,14 +452,25 @@ function DraftBoard({
         <div className="panel-metal p-8 text-center">
           <div className="font-display text-3xl tracking-wide text-accent">NO TEAMS ON RECORD</div>
           <p className="mt-2 text-sm text-muted-foreground">
-            This region + era combo isn't stocked yet. Re-spin to draw again.
+            This region + era combo isn't stocked yet. Use an available region or era re-roll to
+            draw again.
           </p>
-          <button
-            onClick={onReroll}
-            className="mt-5 bg-primary px-5 py-2 font-mono text-xs uppercase tracking-widest text-primary-foreground"
-          >
-            ↻ Re-spin round
-          </button>
+          <div className="mt-5 flex justify-center gap-2">
+            <button
+              onClick={onRerollRegion}
+              disabled={spinning || rerollsUsed.region}
+              className="bg-primary px-5 py-2 font-mono text-xs uppercase tracking-widest text-primary-foreground disabled:opacity-40"
+            >
+              ↻ Region {rerollsUsed.region ? "0" : "1"}
+            </button>
+            <button
+              onClick={onRerollEra}
+              disabled={spinning || rerollsUsed.era}
+              className="bg-accent px-5 py-2 font-mono text-xs uppercase tracking-widest text-accent-foreground disabled:opacity-40"
+            >
+              ↻ Era {rerollsUsed.era ? "0" : "1"}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
