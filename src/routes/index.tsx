@@ -91,7 +91,6 @@ function Index() {
     [active],
   );
 
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -158,8 +157,8 @@ function Hero({ onStart }: { onStart: () => void }) {
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
             Spin a random <span className="text-foreground">region</span> and{" "}
             <span className="text-foreground">era</span>. Pick one legendary FIRST Robotics
-            Competition team from that slice of history. Do it three times. Build the alliance
-            no one can beat.
+            Competition team from that slice of history. Do it three times. Build the alliance no
+            one can beat.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -188,7 +187,10 @@ function Hero({ onStart }: { onStart: () => void }) {
               </div>
               <ul className="space-y-1.5">
                 {REGIONS.map((r) => (
-                  <li key={r.id} className="flex items-center justify-between border-l-2 border-primary/70 bg-background/50 px-2 py-1.5">
+                  <li
+                    key={r.id}
+                    className="flex items-center justify-between border-l-2 border-primary/70 bg-background/50 px-2 py-1.5"
+                  >
                     <span className="font-display text-lg tracking-wide">{r.label}</span>
                     <span className="font-mono text-xs text-muted-foreground">{r.code}</span>
                   </li>
@@ -201,7 +203,10 @@ function Hero({ onStart }: { onStart: () => void }) {
               </div>
               <ul className="space-y-1.5">
                 {ERAS.map((e) => (
-                  <li key={e.id} className="flex items-center justify-between border-l-2 border-accent/70 bg-background/50 px-2 py-1.5">
+                  <li
+                    key={e.id}
+                    className="flex items-center justify-between border-l-2 border-accent/70 bg-background/50 px-2 py-1.5"
+                  >
                     <span className="font-display text-lg tracking-wide">{e.label}</span>
                     <span className="font-mono text-xs text-muted-foreground">{e.years}</span>
                   </li>
@@ -224,7 +229,11 @@ function Hero({ onStart }: { onStart: () => void }) {
           {[
             ["01", "Spin", "Each of the 3 rounds locks in one region and one era at random."],
             ["02", "Pick", "Draft one FRC team from that region and era to fill your alliance."],
-            ["03", "Reveal", "See your all-time three-team alliance. Share it. Try to go 3-0 again."],
+            [
+              "03",
+              "Reveal",
+              "See your all-time three-team alliance. Share it. Try to go 3-0 again.",
+            ],
           ].map(([n, t, d]) => (
             <li key={n} className="panel-metal p-5">
               <div className="font-mono text-xs text-primary">{n}</div>
@@ -395,7 +404,9 @@ function SlotCard({
           {label}
         </div>
         {slot.pick ? (
-          <span className="tag-chip" style={{ color: "var(--color-signal)" }}>LOCKED</span>
+          <span className="tag-chip" style={{ color: "var(--color-signal)" }}>
+            LOCKED
+          </span>
         ) : active ? (
           <span className="tag-chip text-primary">ON THE CLOCK</span>
         ) : (
@@ -405,8 +416,7 @@ function SlotCard({
       {slot.pick ? (
         <div className="mt-2">
           <div className="font-display text-3xl leading-none tracking-wide">
-            <span className="text-primary">{slot.pick.number}</span>{" "}
-            <span>{slot.pick.name}</span>
+            <span className="text-primary">{slot.pick.number}</span> <span>{slot.pick.name}</span>
           </div>
           <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             {region?.label} · {era?.label}
@@ -422,7 +432,9 @@ function SlotCard({
         <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <div className="font-display text-2xl leading-none tracking-wide">{region.label}</div>
           <div className="font-mono text-xs text-muted-foreground">×</div>
-          <div className="font-display text-2xl leading-none tracking-wide text-accent">{era.label}</div>
+          <div className="font-display text-2xl leading-none tracking-wide text-accent">
+            {era.label}
+          </div>
         </div>
       )}
     </button>
@@ -449,7 +461,9 @@ function SpinPanel({
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
           {label}
         </div>
-        <div className={`font-mono text-[10px] ${spinning ? "text-accent" : "text-muted-foreground"}`}>
+        <div
+          className={`font-mono text-[10px] ${spinning ? "text-accent" : "text-muted-foreground"}`}
+        >
           {spinning ? "◐ SPINNING" : "◉ LOCKED"}
         </div>
       </div>
@@ -523,7 +537,9 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
             <article key={i} className="panel-metal relative overflow-hidden p-5">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <span className="tag-chip">{role}</span>
-                <span className="tag-chip text-accent">{region.code} · {era.years}</span>
+                <span className="tag-chip text-accent">
+                  {region.code} · {era.years}
+                </span>
               </div>
               <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 Team
@@ -550,7 +566,7 @@ function Footer() {
     <footer className="border-t border-border/70">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         <div>10-0 · An unofficial FRC fan project. Not affiliated with FIRST®.</div>
-        <div>Regions: MI · TX · CA · ON · Eras: 2007–2026</div>
+        <div>Regions: 29 FRC areas · Eras: 2007–2026</div>
       </div>
     </footer>
   );
