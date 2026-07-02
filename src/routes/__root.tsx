@@ -78,9 +78,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "10-0 — The FRC All-Era Draft" },
-      { name: "description", content: "Draft the ultimate FIRST Robotics Competition dream alliance. Spin a region and era, pick a legendary team, go undefeated." },
+      {
+        name: "description",
+        content:
+          "Draft the ultimate FIRST Robotics Competition dream alliance. Spin a region and era, pick a legendary team, go undefeated.",
+      },
       { property: "og:title", content: "10-0 — The FRC All-Era Draft" },
-      { property: "og:description", content: "Spin. Pick. Dominate. Build your all-time FRC alliance across regions and eras." },
+      {
+        property: "og:description",
+        content: "Spin. Pick. Dominate. Build your all-time FRC alliance across regions and eras.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -88,7 +95,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Bebas+Neue&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Bebas+Neue&display=swap",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
