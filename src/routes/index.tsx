@@ -25,6 +25,24 @@ const THIRD_ROBOT_INDEX = 2;
 const MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK = 100;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
 
+const RANKING_TIERS = [
+  { minimumScore: 283, label: "Einstein Champions" },
+  { minimumScore: 280, label: "Einstein Finalists" },
+  { minimumScore: 277, label: "Division Winner" },
+  { minimumScore: 274, label: "Division Finalist" },
+  { minimumScore: 272, label: "Division Match 13 Loss" },
+  { minimumScore: 270, label: "Division Match 12 Loss" },
+  { minimumScore: 268, label: "1-2 In Division" },
+  { minimumScore: 266, label: "0-2 In Division" },
+  { minimumScore: 260, label: "Regional Winner" },
+  { minimumScore: 250, label: "Regional Finalist" },
+  { minimumScore: 240, label: "District Winner" },
+] as const;
+
+function rankingForCompositeScore(score: number): string {
+  return RANKING_TIERS.find((tier) => score >= tier.minimumScore)?.label ?? "District Alliance";
+}
+
 function randomOf<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -646,6 +664,12 @@ function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
 }
 
 function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void }) {
+  const compositeScore = slots.reduce(
+    (total, slot) => total + (slot.pick?.season.composite_score ?? 0),
+    0,
+  );
+  const ranking = rankingForCompositeScore(compositeScore);
+
   return (
     <section>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -654,6 +678,9 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
             ALLIANCE LOCKED · PROJECTED 10-0
           </div>
           <h2 className="font-display text-6xl tracking-wide">YOUR ALLIANCE</h2>
+          <div className="mt-3 inline-flex border border-accent/60 bg-accent/10 px-4 py-2 font-display text-3xl tracking-wide text-accent">
+            {ranking}
+          </div>
         </div>
         <button
           onClick={onReset}
