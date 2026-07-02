@@ -665,7 +665,7 @@ function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
 }
 
 function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void }) {
-  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared">("idle");
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
   const compositeScore = slots.reduce(
     (total, slot) => total + (slot.pick?.season.composite_score ?? 0),
     0,
@@ -683,18 +683,6 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
   const shareText = shareLines.join("\n");
 
   const shareResults = async () => {
-    const shareData = {
-      title: "TEN & OH FRC Alliance",
-      text: shareText,
-      url: SHARE_URL,
-    };
-
-    if (navigator.share && navigator.canShare?.(shareData)) {
-      await navigator.share(shareData);
-      setShareStatus("shared");
-      return;
-    }
-
     await navigator.clipboard.writeText(shareText);
     setShareStatus("copied");
   };
@@ -765,11 +753,7 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
             onClick={() => void shareResults()}
             className="bg-accent px-5 py-3 font-display text-xl tracking-widest text-accent-foreground transition hover:brightness-110"
           >
-            {shareStatus === "shared"
-              ? "SHARED"
-              : shareStatus === "copied"
-                ? "COPIED"
-                : "SHARE RESULTS"}
+            {shareStatus === "copied" ? "COPIED" : "COPY RESULTS"}
           </button>
         </div>
       </section>
