@@ -24,6 +24,7 @@ const ROUNDS = 3;
 const THIRD_ROBOT_INDEX = 2;
 const MIN_THIRD_ROBOT_WORLDWIDE_EPA_RANK = 100;
 const CAPTAIN_LABELS = ["Captain", "Alliance Pick 1", "Alliance Pick 2"];
+const SHARE_URL = "https://frc-daily-games.vercel.app/";
 
 const RANKING_TIERS = [
   { minimumScore: 272, label: "Einstein Champions" },
@@ -664,11 +665,39 @@ function TeamCard({ team, onPick }: { team: FrcTeam; onPick: () => void }) {
 }
 
 function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void }) {
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "shared">("idle");
   const compositeScore = slots.reduce(
     (total, slot) => total + (slot.pick?.season.composite_score ?? 0),
     0,
   );
   const ranking = rankingForCompositeScore(compositeScore);
+  const shareLines = [
+    `I drafted a ${ranking} alliance on TEN & OH!`,
+    ...slots.map((slot, index) => {
+      const team = slot.pick!;
+      const role = CAPTAIN_LABELS[index] ?? `Pick ${index + 1}`;
+      return `${role}: ${team.number} ${team.name} (${team.season.year})`;
+    }),
+    `Play here: ${SHARE_URL}`,
+  ];
+  const shareText = shareLines.join("\n");
+
+  const shareResults = async () => {
+    const shareData = {
+      title: "TEN & OH FRC Alliance",
+      text: shareText,
+      url: SHARE_URL,
+    };
+
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      await navigator.share(shareData);
+      setShareStatus("shared");
+      return;
+    }
+
+    await navigator.clipboard.writeText(shareText);
+    setShareStatus("copied");
+  };
 
   return (
     <section>
@@ -691,6 +720,59 @@ function FinalRoster({ slots, onReset }: { slots: Slot[]; onReset: () => void })
       </div>
 
       <div className="hazard-stripes mb-6 h-2 opacity-70" />
+
+      <section className="panel-metal mb-6 overflow-hidden" aria-labelledby="share-results-title">
+        <div className="hazard-stripes h-1.5 opacity-80" />
+        <div className="grid gap-5 p-5 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              SHARE SCREEN · MOST RECENT RESULTS
+            </div>
+            <h3 id="share-results-title" className="mt-2 font-display text-4xl tracking-wide">
+              {ranking}
+            </h3>
+            <div className="mt-3 grid gap-2 md:grid-cols-3">
+              {slots.map((slot, index) => {
+                const team = slot.pick!;
+                const role = CAPTAIN_LABELS[index] ?? `Pick ${index + 1}`;
+                return (
+                  <div
+                    key={index}
+                    className="border-l-2 border-primary/70 bg-background/50 px-3 py-2"
+                  >
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {role}
+                    </div>
+                    <div className="font-display text-2xl leading-none tracking-wide">
+                      <span className="text-primary">{team.number}</span> {team.name}
+                    </div>
+                    <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {team.season.year} · #{team.season.rank} EPA
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <a
+              href={SHARE_URL}
+              className="mt-4 inline-flex font-mono text-xs uppercase tracking-widest text-accent underline decoration-accent/50 underline-offset-4 hover:text-primary"
+            >
+              {SHARE_URL}
+            </a>
+          </div>
+          <button
+            type="button"
+            onClick={() => void shareResults()}
+            className="bg-accent px-5 py-3 font-display text-xl tracking-widest text-accent-foreground transition hover:brightness-110"
+          >
+            {shareStatus === "shared"
+              ? "SHARED"
+              : shareStatus === "copied"
+                ? "COPIED"
+                : "SHARE RESULTS"}
+          </button>
+        </div>
+      </section>
 
       <div className="grid gap-4 md:grid-cols-3">
         {slots.map((s, i) => {
